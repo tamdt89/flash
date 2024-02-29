@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.13.0a4-alpine3.19
 RUN pip install poetry
 
 WORKDIR /app

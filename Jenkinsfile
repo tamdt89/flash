@@ -1,55 +1,21 @@
 pipeline {
 
-  agent none
-
-  environment {
-    DOCKER_IMAGE = "nhtua/flask-docker"
-  }
-
+  agent { dockerfile true }
   stages {
-    stage("Test") {
-      agent {
-          docker {
-            image 'python:3.8-slim-buster'
-            args '-u 0:0 -v /tmp:/root/.cache'
-          }
-      }
+    stage('Build image') {
       steps {
-        sh "pip install poetry"
-        sh "poetry install"
-        sh "poetry run pytest"
+        container('docker') {
+          sh 'docker build -t tamdt89/flask-docker .'
+        }
+      }
+    }
+   stage('Push image') {
+      steps {
+        container('docker') {
+          sh 'docker login -u tamdt89 -p DothanhTam'
+          sh 'docker push tamdt89/flask-docker'
+        }
       }
     }
   }
 }
-  //   stage("build") {
-  //     agent { node {label 'master'}}
-  //     environment {
-  //       DOCKER_TAG="${GIT_BRANCH.tokenize('/').pop()}-${GIT_COMMIT.substring(0,7)}"
-  //     }
-  //     steps {
-  //       sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} . "
-  //       sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
-  //       sh "docker image ls | grep ${DOCKER_IMAGE}"
-  //       withCredentials([usernamePassword(credentialsId: 'docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-  //           sh 'echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin'
-  //           sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-  //           sh "docker push ${DOCKER_IMAGE}:latest"
-  //       }
-
-  //       //clean to save disk
-  //       sh "docker image rm ${DOCKER_IMAGE}:${DOCKER_TAG}"
-  //       sh "docker image rm ${DOCKER_IMAGE}:latest"
-  //     }
-  //   }
-  // }
-
-  // post {
-  //   success {
-  //     echo "SUCCESSFUL"
-  //   }
-  //   failure {
-  //     echo "FAILED"
-  //   }
-  // }
-// }

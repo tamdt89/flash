@@ -1,4 +1,5 @@
 FROM python:3.13.0a4-alpine3.19
+RUN pip install --upgrade pip
 RUN pip install poetry
 
 WORKDIR /app
